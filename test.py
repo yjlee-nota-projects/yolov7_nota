@@ -133,7 +133,11 @@ def test(data,
         with torch.no_grad():
             # Run model
             t = time_synchronized()
-            out, train_out = detect_post_part(model(img))  # inference and training outputs
+
+            if detect_post_part is not None:
+                out, train_out = detect_post_part(model(img))  # inference and training outputs
+            else:
+                out, train_out = model(img, augment=augment)
             t0 += time_synchronized() - t
 
             # Compute loss
