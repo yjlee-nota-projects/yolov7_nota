@@ -30,6 +30,10 @@ MS COCO
 | [**YOLOv7-E6**](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6.pt) | 1280 | **56.0%** | **73.5%** | **61.2%** | 56 *fps* | 12.3 *ms* |
 | [**YOLOv7-D6**](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt) | 1280 | **56.6%** | **74.0%** | **61.8%** | 44 *fps* | 15.0 *ms* |
 | [**YOLOv7-E6E**](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt) | 1280 | **56.8%** | **74.4%** | **62.1%** | 36 *fps* | 18.7 *ms* |
+## Pipeline for Compressing YOLOv7 by NetsPresso Model Compressor
+```
+training original model -> compress the model -> fine-tuning the compressed model -> reparameterizing the compressed model
+```
 
 ## Installation
 
@@ -57,8 +61,14 @@ cd /yolov7
 
 [`yolov7.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt) [`yolov7x.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7x.pt) [`yolov7-w6.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-w6.pt) [`yolov7-e6.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6.pt) [`yolov7-d6.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-d6.pt) [`yolov7-e6e.pt`](https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt)
 
+Testing original models
 ``` shell
 python test.py --data data/coco.yaml --img 640 --batch 32 --conf 0.001 --iou 0.65 --device 0 --weights yolov7.pt --name yolov7_640_val
+```
+
+Testing compressed models
+``` shell
+python test.py --data data/coco.yaml --img 640 --batch 32 --conf 0.001 --iou 0.65 --device 0 --weights yolov7.pt --name yolov7_640_val --cfg cfg/training/yolov7.yaml --npmc-mode
 ```
 
 You will get the results:
@@ -94,10 +104,10 @@ Single GPU training
 
 ``` shell
 # train p5 models
-python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml
+python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml --npmc-mode
 
 # train p6 models
-python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
+python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml --npmc-mode
 ```
 
 Multiple GPU training
@@ -109,6 +119,27 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9527 train.p
 # train p6 models
 python -m torch.distributed.launch --nproc_per_node 8 --master_port 9527 train_aux.py --workers 8 --device 0,1,2,3,4,5,6,7 --sync-bn --batch-size 128 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
 ```
+Single GPU fine-tuning
+
+``` shell
+# train p5 models
+python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights path_to_compressed_model_file --name yolov7 --hyp data/hyp.scratch.p5.yaml
+
+# train p6 models
+python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights path_to_compressed_model_file --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
+```
+
+Multiple GPU fine-tuning compressed model
+
+``` shell
+# train p5 models
+python -m torch.distributed.launch --nproc_per_node 4 --master_port 9527 train.py --workers 8 --device 0,1,2,3 --sync-bn --batch-size 128 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights path_to_compressed_model_file --name yolov7 --hyp data/hyp.scratch.p5.yaml
+
+# train p6 models
+python -m torch.distributed.launch --nproc_per_node 8 --master_port 9527 train_aux.py --workers 8 --device 0,1,2,3,4,5,6,7 --sync-bn --batch-size 128 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights path_to_compressed_model_file --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
+```
+## Compressing
+Visit [netspresso.ai](https://netspresso.ai/) and compress the model. You can get step by step guide from [here](https://docs.netspresso.ai/docs/mc-step1-prepare-model).
 
 ## Transfer learning
 
@@ -125,8 +156,13 @@ python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/custom.ya
 ```
 
 ## Re-parameterization
-
+Reparameterizing original models
 See [reparameterization.ipynb](tools/reparameterization.ipynb)
+
+Reparameterizing compressed models
+``` shell
+python reparameterization_npmc.py --model path_to_compressed_model_file --save-path path_to_be_saved --model-name yolov7 --cfg cfg/training/yolov7.yaml
+```
 
 ## Inference
 
