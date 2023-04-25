@@ -119,7 +119,7 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9527 train.p
 # train p6 models
 python -m torch.distributed.launch --nproc_per_node 8 --master_port 9527 train_aux.py --workers 8 --device 0,1,2,3,4,5,6,7 --sync-bn --batch-size 128 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
 ```
-Single GPU fine-tuning
+Single GPU fine-tuning compressed models
 
 ``` shell
 # train p5 models
@@ -129,7 +129,7 @@ python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --i
 python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights path_to_compressed_model_file --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
 ```
 
-Multiple GPU fine-tuning compressed model
+Multiple GPU fine-tuning compressed models
 
 ``` shell
 # train p5 models
@@ -138,7 +138,7 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9527 train.p
 # train p6 models
 python -m torch.distributed.launch --nproc_per_node 8 --master_port 9527 train_aux.py --workers 8 --device 0,1,2,3,4,5,6,7 --sync-bn --batch-size 128 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights path_to_compressed_model_file --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
 ```
-## Compressing
+## Compression
 Visit [netspresso.ai](https://netspresso.ai/) and compress the model. You can get step by step guide from [here](https://docs.netspresso.ai/docs/mc-step1-prepare-model).
 
 ## Transfer learning
