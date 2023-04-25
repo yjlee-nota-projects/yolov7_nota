@@ -104,10 +104,10 @@ Single GPU training
 
 ``` shell
 # train p5 models
-python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml --npmc-mode
+python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights '' --name yolov7 --hyp data/hyp.scratch.p5.yaml 
 
 # train p6 models
-python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml --npmc-mode
+python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml 
 ```
 
 Multiple GPU training
@@ -119,17 +119,18 @@ python -m torch.distributed.launch --nproc_per_node 4 --master_port 9527 train.p
 # train p6 models
 python -m torch.distributed.launch --nproc_per_node 8 --master_port 9527 train_aux.py --workers 8 --device 0,1,2,3,4,5,6,7 --sync-bn --batch-size 128 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights '' --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
 ```
-Single GPU fine-tuning compressed models
+## Fine-tuning
+Single GPU fine-tuning
 
 ``` shell
 # train p5 models
-python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights path_to_compressed_model_file --name yolov7 --hyp data/hyp.scratch.p5.yaml
+python train.py --workers 8 --device 0 --batch-size 32 --data data/coco.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights path_to_compressed_model_file --name yolov7 --hyp data/hyp.scratch.p5.yaml --npmc-mode
 
 # train p6 models
-python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights path_to_compressed_model_file --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml
+python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/coco.yaml --img 1280 1280 --cfg cfg/training/yolov7-w6.yaml --weights path_to_compressed_model_file --name yolov7-w6 --hyp data/hyp.scratch.p6.yaml --npmc-mode
 ```
 
-Multiple GPU fine-tuning compressed models
+Multiple GPU fine-tuning
 
 ``` shell
 # train p5 models
@@ -185,6 +186,10 @@ python detect.py --weights yolov7.pt --conf 0.25 --img-size 640 --source inferen
 
 
 ## Export
+**Pytorch to fx.GraphModule format (to compressing the model)**
+```bash
+python export_fx.py --model path_to_model_file --cfg cfg/training/yolov7.pt --save-path path_to_fx_model_to_be_saved
+```
 
 **Pytorch to CoreML (and inference on MacOS/iOS)** <a href="https://colab.research.google.com/github/WongKinYiu/yolov7/blob/main/tools/YOLOv7CoreML.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
 
