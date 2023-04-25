@@ -157,6 +157,7 @@ python train_aux.py --workers 8 --device 0 --batch-size 16 --data data/custom.ya
 
 ## Re-parameterization
 Reparameterizing original models
+
 See [reparameterization.ipynb](tools/reparameterization.ipynb)
 
 Reparameterizing compressed models
